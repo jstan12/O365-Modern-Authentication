@@ -5,7 +5,7 @@ You will need to have MSOnline, Skype for Business Online Windows PowerShell, an
 The Skype for Business Online module requires Microsoft .NET Framework 4.7 and Microsoft Visual C++ Redistributable for Visual Studio 2017 during installation this will require manual installation prior to running the script
 - Microsoft Visual C++ Redistributable for Visual Studio 2017: https://visualstudio.microsoft.com/downloads/ - Other Tools and
 
-### Installing/Loading Module Prompts
+### Installing & Loading Module Prompts
 
 	Do you want to check Office 365? [y/n]
 The MSOnline module will be installed and loaded
@@ -20,7 +20,7 @@ The Skype for Business Online PowerShell module will be downloaded, an installer
 
 Once all the modules have been loaded, a modern authentication window will ask for global admin credentials for O365 tenant. Enter your Office 365 domain in the terminal.
 
-### Enabling Modern Auth/Disabling Basic Auth
+### Enabling Modern Auth & Disabling Basic Auth
 If the script sees something different from the example output below, the user will be asked if they want to make the change:
 	
 	Modern auth not enabled for O365. Enable now? [y/n]
