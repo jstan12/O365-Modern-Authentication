@@ -6,28 +6,33 @@ The Skype for Business Online module requires Microsoft .NET Framework 4.7 and M
 - Microsoft Visual C++ Redistributable for Visual Studio 2017: https://visualstudio.microsoft.com/downloads/ - Other Tools and
 
 ### Installing/Loading Module Prompts
-Do you want to check Office 365? [y/n]
-- If answered yes, the MSOnline module will be installed and loaded
-Do you want to check SharePoint Online? [y/n]
-- If answered yes, the SharePoint Online PowerShell module will be downloaded, an installer will run, then the module will be loaded
-Do you want to check Skype for Business Online?
-- If Skype for Business module not found it will be downloaded and installed
-Installing Skype for Business Online module will require system reboot! Proceed? [y/n]
-- If answered yes, the Skype for Business Online PowerShell module will be downloaded, an installer will run, then the machine will prompt for reboot
-A modern authentication window will ask for global admin credentials for O365 tenant
-Enter your Office 365 domain
+
+	Do you want to check Office 365? [y/n]
+The MSOnline module will be installed and loaded
+	
+	Do you want to check SharePoint Online? [y/n]
+The SharePoint Online PowerShell module will be downloaded, an installer will run, then the module will be loaded
+
+	Do you want to check Skype for Business Online?
+	If Skype for Business module not found it will be downloaded and installed
+	Installing Skype for Business Online module will require system reboot! Proceed? [y/n]
+The Skype for Business Online PowerShell module will be downloaded, an installer will run, then the machine will prompt for reboot
+
+Once all the modules have been loaded, a modern authentication window will ask for global admin credentials for O365 tenant. Enter your Office 365 domain in the terminal.
 
 ### Enabling Modern Auth/Disabling Basic Auth
 If the script sees something different from the example output below, the user will be asked if they want to make the change:
-Modern auth not enabled for O365. Enable now? [y/n]
-Modern auth not enabled for SharePoint Online. Enable now? [y/n]
-Basic auth for SharePoint Online is enabled. Disable now? [y/n]
-Modern auth for Skype for Business Online is disabled. Enable now? [y/n]
+	
+	Modern auth not enabled for O365. Enable now? [y/n]
+	Modern auth not enabled for SharePoint Online. Enable now? [y/n]
+	Basic auth for SharePoint Online is enabled. Disable now? [y/n]
+	Modern auth for Skype for Business Online is disabled. Enable now? [y/n]
 
 ### Example Output
-Domain: example.onmicrosoft.com
-Federation: Managed
-O365 Modern Auth Enabled: True
-Skype Modern Auth: Allowed
-SharePoint Online Modern Auth Disabled: False
-SharePoint Online Legacy Auth Enabled: False
+
+	Domain: example.onmicrosoft.com
+	Federation: Managed
+	O365 Modern Auth Enabled: True
+	Skype Modern Auth: Allowed
+	SharePoint Online Modern Auth Disabled: False
+	SharePoint Online Legacy Auth Enabled: False
