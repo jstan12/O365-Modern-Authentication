@@ -20,12 +20,11 @@ The Skype for Business Online PowerShell module will be downloaded, an installer
 
 Once all the modules have been loaded, a modern authentication window will ask for global admin credentials for O365 tenant. Enter your Office 365 domain in the terminal.
 
-### Enabling Modern Auth & Disabling Basic Auth
+### Enabling Modern Auth
 If the script sees something different from the example output below, the user will be asked if they want to make the change:
 	
 	Modern auth not enabled for O365. Enable now? [y/n]
 	Modern auth not enabled for SharePoint Online. Enable now? [y/n]
-	Basic auth for SharePoint Online is enabled. Disable now? [y/n]
 	Modern auth for Skype for Business Online is disabled. Enable now? [y/n]
 
 ### Example Output
