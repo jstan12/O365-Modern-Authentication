@@ -1,29 +1,3 @@
-
-Skip to content
-
-    Pull requests
-    Issues
-    Marketplace
-    Explore
-
-    @jstan12
-
-0
-1
-
-    0
-
-jstan12/O365-Modern-Authentication
-Code
-Issues 0
-Pull requests 0
-Projects 0
-Wiki
-Insights
-Settings
-O365-Modern-Authentication/o365_modern_auth_checks.ps1
-@jstan12 jstan12 Create o365_modern_auth_checks.ps1 0398e7b on Jan 17
-164 lines (148 sloc) 7.39 KB
 #######
 #### Requirements ####
 ## MSOnline Module: Install-Module MSOnline
