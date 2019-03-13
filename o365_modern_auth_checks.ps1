@@ -124,7 +124,7 @@ If ($spoConfirm -eq 'y'){
     }
     Else {Write-Host "SharePoint Online modern auth enabled"}
 
-<#
+
     If ($spoModernAuth.LegacyAuthProtocolsEnabled -eq $true){
         ## Do you want to disable basic auth?
         # Set-SPOTenant -LegacyAuthProtocolsEnabled $false
@@ -138,7 +138,7 @@ If ($spoConfirm -eq 'y'){
     $spoADAL = 'SharePoint Online Modern Auth Disabled: ' + $spoModernAuth.OfficeClientADALDisabled
     $spoLegacy = 'SharePoint Online Legacy Auth Enabled: ' + $spoModernAuth.LegacyAuthProtocolsEnabled
 }
-#>
+
 
 If ($skypeConfirm -eq 'y'){
     ### Skype Modern Authentication Status
