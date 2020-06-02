@@ -29,13 +29,13 @@ function spo_module {
     ### Get SPO Management Shell Module
     If (-not (Get-Module -Name 'Microsoft.Online.SharePoint.PowerShell')) {
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-        $spoConnector = 'https://download.microsoft.com/download/0/2/E/02E7E5BA-2190-44A8-B407-BC73CA0D6B87/SharePointOnlineManagementShell_8414-1200_x64_en-us.msi'
-        $spoFile = 'SharePointOnlineManagementShell_8414-1200_x64_en-us.msi'
+        $spoConnector = 'https://download.microsoft.com/download/0/2/E/02E7E5BA-2190-44A8-B407-BC73CA0D6B87/SharePointOnlineManagementShell_20122-12000_x64_en-us.msi'
+        $spoFile = 'SharePointOnlineManagementShell_20122-12000_x64_en-us.msi'
         $spoFilePath = $filePath + $spoFile
         Write-Host 'SharePointOnlineManagementShell not found...'
-        Write-Host 'Downloading SharePointOnlineManagementShell_8414-1200_x64_en-us.msi'
+        Write-Host 'Downloading SharePointOnlineManagementShell_20122-12000_x64_en-us.msi'
         Invoke-WebRequest -Uri $spoConnector -OutFile $spoFilePath
-        Write-Host 'Installing SharePointOnlineManagementShell_8414-1200_x64_en-us.msi'
+        Write-Host 'Installing SharePointOnlineManagementShell_20122-12000_x64_en-us.msi'
         Start-Process $spoFilePath -Wait
         Remove-Item $spoFilePath
         Import-Module 'C:\Program Files\SharePoint Online Management Shell\Microsoft.Online.SharePoint.PowerShell'
