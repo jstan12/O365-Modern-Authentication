@@ -10,6 +10,11 @@
 ## Date: 2019-1-3
 #######
 
+# Variables 
+$ProgressPreference=’SilentlyContinue’
+$filePath = "$($env:USERPROFILE)\Desktop\"
+$file =  $filePath + "modernAuthChecks.txt"
+
 function o365_module {
     Import-Module MSOnline -ErrorAction SilentlyContinue
     ### Get MSOnline Module
@@ -66,23 +71,30 @@ function skype_module{
 }
 
 function load_modules{
-    $o365Confirm = Read-Host "Do you want to check Office 365? [y/n]"
+    $o365Confirm = Read-Host "Do you want to check Office 365 services for modern auth? [y/n]"
     If ($o365Confirm -eq 'y'){o365_module}
-    $spoConfirm = Read-Host "Do you want to check SharePoint Online? [y/n]"
+    $spoConfirm = Read-Host "Do you want to check SharePoint Online for modern auth? [y/n]"
     If ($spoConfirm -eq 'y'){spo_module}
-    Write-Host "Do you want to check Skype for Business Online?"
-    Write-Host "If Skype for Business module not found it will be downloaded and installed"
-    $skypeConfirm = Read-Host "Installing Skype for Business Online module will require system reboot! Proceed? [y/n]"
+    $runskype = Read-Host "Do you want to check Skype for Business Online for modern auth? [y/n]"
+    If ($runskype -eq 'y'){
+        Write-Host "If Skype for Business module not found it will be downloaded and installed"
+        $skypeConfirm = Read-Host "Installing Skype for Business Online module will require system reboot! Proceed? [y/n]"
+        }
     If ($skypeConfirm -eq 'y'){skype_module}
 }
 
-function exchange{
+function login {
+    $UserName = Write-Host 'Enter your Office 365 global admin credentials (Two prompts possible)'
+    $UserCredential = Get-Credential
+    #dom = $UserCredential.UserName -creplace '^[^\@]*\@', ''
+    $dom = Read-Host 'Enter your Office 365 onmicrosoft.com domain name'
+}
+
+function o365 {
     If ($o365Confirm -eq 'y'){
         ### O365 Federation Status
-        $UserCredential = Get-Credential
         Connect-MsolService -Credential $UserCredential
         # Get domain federation status
-        $dom = Read-Host -Prompt 'Enter your Office 365 domain'
         $federation = Get-MsolDomain -domain $dom
 
         ### O365 Modern Authentication Status
@@ -106,7 +118,7 @@ function exchange{
     }
 }
 
-function sharepoint{
+function spo {
     If ($spoConfirm -eq 'y'){
         ### SharePoint Online Modern AUthentication Status
         # Build Sharepoint admin URL using regex
@@ -140,14 +152,12 @@ function sharepoint{
     }
 }
 
-function skype{
+function skype {
     If ($skypeConfirm -eq 'y'){
         ### Skype Modern Authentication Status
-        ## Login with basic auth if modern auth login fails
-        $UserName = Read-Host -Prompt 'Enter your Office 365 username: '
-        $cssession = New-CsOnlineSession -UserName $UserName
+        $UserName = Write-Host 'Enter your Office 365 global admin credentials (Auth needed for specifically for Sykpe)'
+        $cssession = New-CsOnlineSession
 
-        #$cssession = New-CsOnlineSession –Credential $UserCredential
         Import-PSSession $cssession
         $skypeModernAuth = Get-CsOAuthConfiguration
         If ($skypeModernAuth.ClientAdalAuthOverride -ne 'Allowed'){
@@ -157,17 +167,18 @@ function skype{
                 Set-CsOAuthConfiguration -ClientAdalAuthOverride Allowed
                 }
         }
-        Else {Write-Host "Skype for Business Online modern auth allowed"}
+        Else {Write-Host "Skype for Business Online modern auth is enabled/allowed"}
         Remove-PSSession $cssession
         $skype = 'Skype Modern Auth: ' + $skypeModernAuth.ClientAdalAuthOverride
     }
 }
 
-$ProgressPreference=’SilentlyContinue’
-$filePath = "$($env:USERPROFILE)\Desktop\"
-$file =  $filePath + "modernAuthChecks.txt"
+##################
+
 load_modules
-exchange
-sharepoint
+login
+o365
+spo
+skype
 Write-Output $domain $fed $365 $skype $spoADAL $spoLegacy >> $file
 Write-Host 'Configuration checks written to' $file 
