@@ -1,4 +1,4 @@
-#######
+ #######
 #### Requirements ####
 ## MSOnline Module: Install-Module MSOnline
 ## Skype for Business Online, Windows PowerShell Module required: https://www.microsoft.com/en-us/download/details.aspx?id=39366
@@ -65,101 +65,109 @@ function skype_module{
     }
 }
 
+function load_modules{
+    $o365Confirm = Read-Host "Do you want to check Office 365? [y/n]"
+    If ($o365Confirm -eq 'y'){o365_module}
+    $spoConfirm = Read-Host "Do you want to check SharePoint Online? [y/n]"
+    If ($spoConfirm -eq 'y'){spo_module}
+    Write-Host "Do you want to check Skype for Business Online?"
+    Write-Host "If Skype for Business module not found it will be downloaded and installed"
+    $skypeConfirm = Read-Host "Installing Skype for Business Online module will require system reboot! Proceed? [y/n]"
+    If ($skypeConfirm -eq 'y'){skype_module}
+}
+
+function exchange{
+    If ($o365Confirm -eq 'y'){
+        ### O365 Federation Status
+        $UserCredential = Get-Credential
+        Connect-MsolService -Credential $UserCredential
+        # Get domain federation status
+        $dom = Read-Host -Prompt 'Enter your Office 365 domain'
+        $federation = Get-MsolDomain -domain $dom
+
+        ### O365 Modern Authentication Status
+        $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://outlook.office365.com/powershell-liveid/ -Credential $UserCredential -Authentication Basic -AllowRedirection
+        Import-PSSession $Session -DisableNameChecking
+        $o365ModernAuth = Get-OrganizationConfig
+    
+        If ($o365ModernAuth.OAuth2ClientProfileEnabled -ne $true){
+            ## Enable modern auth prompt
+            $o365EnableModernAuth = Read-Host "Modern auth not enabled for O365. Enable now? [y/n]"
+            If ($o365EnableModernAuth -eq 'y'){
+                Set-OrganizationConfig -OAuth2ClientProfileEnabled:$true
+                }
+        }
+        Else {Write-Host "O365 modern auth enabled"}
+    
+        Remove-PSSession $Session
+        $domain = 'Domain: ' + $federation.Name
+        $fed = 'Federation: ' + $federation.Authentication
+        $365 = 'O365 Modern Auth Enabled: ' + $o365modernAuth.OAuth2ClientProfileEnabled
+    }
+}
+
+function sharepoint{
+    If ($spoConfirm -eq 'y'){
+        ### SharePoint Online Modern AUthentication Status
+        # Build Sharepoint admin URL using regex
+        $spoDom = $dom -replace '\.(.*)'
+        [string]$spoDom = 'https://' + $spoDom + '-admin.sharepoint.com'
+
+        Connect-SPOService -Url $spoDom -Credential $UserCredential
+        $spoModernAuth = Get-SPOTenant
+        If ($spoModernAuth.OfficeClientADALDisabled -ne $false){
+            ## Enable modern auth
+            $spoEnableModernAuth = Read-Host "Modern auth not enabled for SharePoint Online. Enable now? [y/n]"
+            If ($spoEnableModernAuth -eq 'y'){
+                Set-SPOTenant -OfficeClientADALDisabled $false
+                }
+        }
+        Else {Write-Host "SharePoint Online modern auth enabled"}
+
+
+        If ($spoModernAuth.LegacyAuthProtocolsEnabled -eq $true){
+            ## Do you want to disable basic auth?
+            # Set-SPOTenant -LegacyAuthProtocolsEnabled $false
+            $spoDisableBasicAuth = Read-Host "Basic auth for SharePoint Online is enabled. Disable now? [y/n]"
+            If ($spoDisableBasicAuth -eq 'y'){
+                Set-SPOTenant -LegacyAuthProtocolsEnabled $false
+                }
+        }
+        Else {Write-Host "SharePoint Online basic auth disabled"}
+        Disconnect-SPOService
+        $spoADAL = 'SharePoint Online Modern Auth Disabled: ' + $spoModernAuth.OfficeClientADALDisabled
+        $spoLegacy = 'SharePoint Online Legacy Auth Enabled: ' + $spoModernAuth.LegacyAuthProtocolsEnabled
+    }
+}
+
+function skype{
+    If ($skypeConfirm -eq 'y'){
+        ### Skype Modern Authentication Status
+        ## Login with basic auth if modern auth login fails
+        $UserName = Read-Host -Prompt 'Enter your Office 365 username: '
+        $cssession = New-CsOnlineSession -UserName $UserName
+
+        #$cssession = New-CsOnlineSession –Credential $UserCredential
+        Import-PSSession $cssession
+        $skypeModernAuth = Get-CsOAuthConfiguration
+        If ($skypeModernAuth.ClientAdalAuthOverride -ne 'Allowed'){
+            ## Set Modern auth to allowed?
+            $skypeEnableModernAuth = Read-Host "Modern auth for Skype for Business Online is disabled. Enable now? [y/n]"
+            If ($skypeEnableModernAuth -eq 'y'){
+                Set-CsOAuthConfiguration -ClientAdalAuthOverride Allowed
+                }
+        }
+        Else {Write-Host "Skype for Business Online modern auth allowed"}
+        Remove-PSSession $cssession
+        $skype = 'Skype Modern Auth: ' + $skypeModernAuth.ClientAdalAuthOverride
+    }
+}
+
 $ProgressPreference=’SilentlyContinue’
 $filePath = "$($env:USERPROFILE)\Desktop\"
 $file =  $filePath + "modernAuthChecks.txt"
-
-## Load modules
-$o365Confirm = Read-Host "Do you want to check Office 365? [y/n]"
-If ($o365Confirm -eq 'y'){o365_module}
-$spoConfirm = Read-Host "Do you want to check SharePoint Online? [y/n]"
-If ($spoConfirm -eq 'y'){spo_module}
-Write-Host "Do you want to check Skype for Business Online?"
-Write-Host "If Skype for Business module not found it will be downloaded and installed"
-$skypeConfirm = Read-Host "Installing Skype for Business Online module will require system reboot! Proceed? [y/n]"
-If ($skypeConfirm -eq 'y'){skype_module}
-
-If ($o365Confirm -eq 'y'){
-    ### O365 Federation Status
-    $UserCredential = Get-Credential
-    Connect-MsolService -Credential $UserCredential
-    # Get domain federation status
-    $dom = Read-Host -Prompt 'Enter your Office 365 domain'
-    $federation = Get-MsolDomain -domain $dom
-
-    ### O365 Modern Authentication Status
-    $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://outlook.office365.com/powershell-liveid/ -Credential $UserCredential -Authentication Basic -AllowRedirection
-    Import-PSSession $Session -DisableNameChecking
-    $o365ModernAuth = Get-OrganizationConfig
-    
-    If ($o365ModernAuth.OAuth2ClientProfileEnabled -ne $true){
-        ## Enable modern auth prompt
-        $o365EnableModernAuth = Read-Host "Modern auth not enabled for O365. Enable now? [y/n]"
-        If ($o365EnableModernAuth -eq 'y'){
-            Set-OrganizationConfig -OAuth2ClientProfileEnabled:$true
-            }
-    }
-    Else {Write-Host "O365 modern auth enabled"}
-    
-    Remove-PSSession $Session
-    $domain = 'Domain: ' + $federation.Name
-    $fed = 'Federation: ' + $federation.Authentication
-    $365 = 'O365 Modern Auth Enabled: ' + $o365modernAuth.OAuth2ClientProfileEnabled
-}
-
-If ($spoConfirm -eq 'y'){
-    ### SharePoint Online Modern AUthentication Status
-    # Build Sharepoint admin URL using regex
-    $spoDom = $dom -replace '\.(.*)'
-    [string]$spoDom = 'https://' + $spoDom + '-admin.sharepoint.com'
-
-    Connect-SPOService -Url $spoDom -Credential $UserCredential
-    $spoModernAuth = Get-SPOTenant
-    If ($spoModernAuth.OfficeClientADALDisabled -ne $false){
-        ## Enable modern auth
-        $spoEnableModernAuth = Read-Host "Modern auth not enabled for SharePoint Online. Enable now? [y/n]"
-        If ($spoEnableModernAuth -eq 'y'){
-            Set-SPOTenant -OfficeClientADALDisabled $false
-            }
-    }
-    Else {Write-Host "SharePoint Online modern auth enabled"}
-
-
-    If ($spoModernAuth.LegacyAuthProtocolsEnabled -eq $true){
-        ## Do you want to disable basic auth?
-        # Set-SPOTenant -LegacyAuthProtocolsEnabled $false
-        $spoDisableBasicAuth = Read-Host "Basic auth for SharePoint Online is enabled. Disable now? [y/n]"
-        If ($spoDisableBasicAuth -eq 'y'){
-            Set-SPOTenant -LegacyAuthProtocolsEnabled $false
-            }
-    }
-    Else {Write-Host "SharePoint Online basic auth disabled"}
-    Disconnect-SPOService
-    $spoADAL = 'SharePoint Online Modern Auth Disabled: ' + $spoModernAuth.OfficeClientADALDisabled
-    $spoLegacy = 'SharePoint Online Legacy Auth Enabled: ' + $spoModernAuth.LegacyAuthProtocolsEnabled
-}
-
-
-If ($skypeConfirm -eq 'y'){
-    ### Skype Modern Authentication Status
-    ## Login with basic auth if modern auth login fails
-    # $UserName = Read-Host -Prompt 'Enter your Office 365 username: '
-    # $cssession = New-CsOnlineSession -UserName $UserName
-
-    $cssession = New-CsOnlineSession –Credential $UserCredential
-    Import-PSSession $cssession
-    $skypeModernAuth = Get-CsOAuthConfiguration
-    If ($skypeModernAuth.ClientAdalAuthOverride -ne 'Allowed'){
-        ## Set Modern auth to allowed?
-        $skypeEnableModernAuth = Read-Host "Modern auth for Skype for Business Online is disabled. Enable now? [y/n]"
-        If ($skypeEnableModernAuth -eq 'y'){
-            Set-CsOAuthConfiguration -ClientAdalAuthOverride Allowed
-            }
-    }
-    Else {Write-Host "Skype for Business Online modern auth allowed"}
-    Remove-PSSession $cssession
-    $skype = 'Skype Modern Auth: ' + $skypeModernAuth.ClientAdalAuthOverride
-}
-
+load_modules
+exchange
+sharepoint
 Write-Output $domain $fed $365 $skype $spoADAL $spoLegacy >> $file
-Write-Host 'Configuration checks written to' $file
+Write-Host 'Configuration checks written to' $file 
